@@ -271,7 +271,7 @@ function displayBoxScore(boxscores, gameId) {
                         <tbody>
                             ${teams[team].map((player, idx) => `
                                 <tr class="${idx % 2 === 0 ? 'even-row' : 'odd-row'}">
-                                    <td class="player-col"><strong>${player.player}</strong></td>
+                                    <td class="player-col"><strong><a href="#" class="player-link" data-player="${player.player}">${player.player}</a></strong></td>
                                     <td>${player.min || '0:00'}</td>
                                     <td>-</td>
                                     <td>-</td>
@@ -307,6 +307,15 @@ function displayBoxScore(boxscores, gameId) {
 
     boxscoreSection.classList.remove('hidden');
 
+    // Add click handlers to player links
+    document.querySelectorAll('.player-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const playerName = e.target.dataset.player;
+            viewPlayerStats(playerName);
+        });
+    });
+
     // Scroll to boxscore
     boxscoreSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -321,6 +330,156 @@ function parseMinutes(minStr) {
     if (!minStr || minStr === '0:00') return 0;
     const parts = minStr.split(':');
     return parseInt(parts[0]) || 0;
+}
+
+async function viewPlayerStats(playerName) {
+    try {
+        showLoading();
+        const response = await fetch(`/api/player/${encodeURIComponent(playerName)}?limit=10`);
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error);
+        }
+
+        displayPlayerStatsModal(data);
+
+    } catch (error) {
+        displayError(error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function displayPlayerStatsModal(data) {
+    const player = data.player;
+    const games = data.games;
+
+    // Calculate season averages
+    let avgPts = 0, avgReb = 0, avgAst = 0, avgStl = 0, avgBlk = 0, avgMin = 0, avgFg = 0, avg3p = 0;
+    if (games.length > 0) {
+        avgPts = (games.reduce((sum, g) => sum + (g.PTS || 0), 0) / games.length).toFixed(1);
+        avgReb = (games.reduce((sum, g) => sum + (g.REB || 0), 0) / games.length).toFixed(1);
+        avgAst = (games.reduce((sum, g) => sum + (g.AST || 0), 0) / games.length).toFixed(1);
+        avgStl = (games.reduce((sum, g) => sum + (g.STL || 0), 0) / games.length).toFixed(1);
+        avgBlk = (games.reduce((sum, g) => sum + (g.BLK || 0), 0) / games.length).toFixed(1);
+        avgMin = (games.reduce((sum, g) => sum + (parseFloat(g.MIN) || 0), 0) / games.length).toFixed(1);
+        avgFg = (games.reduce((sum, g) => sum + ((g.FG_PCT || 0) * 100), 0) / games.length).toFixed(1);
+        avg3p = (games.reduce((sum, g) => sum + ((g.FG3_PCT || 0) * 100), 0) / games.length).toFixed(1);
+    }
+
+    // Remove existing modal if any
+    const existingModal = document.querySelector('.player-modal-overlay');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'player-modal-overlay';
+    modal.innerHTML = `
+        <div class="player-modal">
+            <div class="player-modal-header">
+                <h2>${player.name}</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="player-modal-body">
+                <div class="player-stats-summary">
+                    <h3>Season Averages (Last ${games.length} Games)</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-value">${avgPts}</div>
+                            <div class="stat-label">PTS</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${avgReb}</div>
+                            <div class="stat-label">REB</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${avgAst}</div>
+                            <div class="stat-label">AST</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${avgStl}</div>
+                            <div class="stat-label">STL</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${avgBlk}</div>
+                            <div class="stat-label">BLK</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${avgMin}</div>
+                            <div class="stat-label">MIN</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${avgFg}%</div>
+                            <div class="stat-label">FG%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${avg3p}%</div>
+                            <div class="stat-label">3P%</div>
+                        </div>
+                    </div>
+                </div>
+                <h3>Recent Games</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Matchup</th>
+                                <th>MIN</th>
+                                <th>PTS</th>
+                                <th>REB</th>
+                                <th>AST</th>
+                                <th>STL</th>
+                                <th>BLK</th>
+                                <th>FG%</th>
+                                <th>3P%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playerGamesBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Populate table
+    const tbody = modal.querySelector('#playerGamesBody');
+    games.forEach(game => {
+        const row = document.createElement('tr');
+        const fgPct = game.FG_PCT ? (game.FG_PCT * 100).toFixed(1) : '0.0';
+        const fg3Pct = game.FG3_PCT ? (game.FG3_PCT * 100).toFixed(1) : '0.0';
+
+        row.innerHTML = `
+            <td>${game.GAME_DATE}</td>
+            <td>${game.MATCHUP}</td>
+            <td>${game.MIN || 0}</td>
+            <td><strong>${game.PTS || 0}</strong></td>
+            <td>${game.REB || 0}</td>
+            <td>${game.AST || 0}</td>
+            <td>${game.STL || 0}</td>
+            <td>${game.BLK || 0}</td>
+            <td>${fgPct}%</td>
+            <td>${fg3Pct}%</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Close button handler
+    modal.querySelector('.close-modal').addEventListener('click', () => {
+        modal.remove();
+    });
+
+    // Click outside to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
 }
 
 function displayError(message) {

@@ -9,6 +9,7 @@ from datetime import date, timedelta
 import sys
 import io
 import requests
+import pandas as pd
 import tracker
 import boxscore_controller
 
@@ -211,9 +212,146 @@ def get_boxscore():
             'error': str(e)
         }), 500
 
+@app.route('/api/fantasy/sync', methods=['POST'])
+def fantasy_sync():
+    """Manually trigger fantasy data sync"""
+    try:
+        from fantasy.fantasy_sync import sync_fantasy_data
+        result = sync_fantasy_data()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/fantasy/teams', methods=['GET'])
+def get_fantasy_teams():
+    """Get all fantasy teams"""
+    try:
+        from fantasy.fantasy_sync import get_latest_fantasy_data
+        data = get_latest_fantasy_data()
+        teams = data.get('teams', pd.DataFrame()).to_dict('records')
+        return jsonify({
+            'success': True,
+            'teams': teams,
+            'count': len(teams)
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/fantasy/rosters', methods=['GET'])
+def get_fantasy_rosters():
+    """Get all fantasy rosters"""
+    try:
+        from fantasy.fantasy_sync import get_latest_fantasy_data
+        data = get_latest_fantasy_data()
+        rosters = data.get('rosters', pd.DataFrame()).to_dict('records')
+        return jsonify({
+            'success': True,
+            'rosters': rosters,
+            'count': len(rosters)
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/fantasy/matchups', methods=['GET'])
+def get_fantasy_matchups():
+    """Get current week's matchups"""
+    try:
+        from fantasy.fantasy_sync import get_latest_fantasy_data
+        data = get_latest_fantasy_data()
+        matchups = data.get('matchups', pd.DataFrame()).to_dict('records')
+        return jsonify({
+            'success': True,
+            'matchups': matchups,
+            'count': len(matchups)
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/fantasy/report', methods=['GET'])
+def get_fantasy_report():
+    """Get daily fantasy report with merged real stats"""
+    try:
+        date_param = request.args.get('date')
+        from fantasy.merge_pipeline import generate_daily_fantasy_report
+        report = generate_daily_fantasy_report(target_date=date_param)
+        return jsonify(report)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/fantasy')
+def fantasy_page():
+    return app.send_static_file('fantasy.html')
+
 @app.route('/schedule')
 def schedule_page():
     return app.send_static_file('schedule.html')
+
+@app.route('/api/player/<player_name>', methods=['GET'])
+def get_player_stats(player_name):
+    """
+    Get stats for a specific player across all available games
+    Query params:
+        - season: Season year (optional, defaults to current season)
+        - limit: Number of recent games to return (optional, default 10)
+    """
+    try:
+        limit = request.args.get('limit', 10, type=int)
+
+        # Use NBA API to get player stats
+        from nba_api.stats.endpoints import playergamelog
+        from nba_api.stats.static import players
+
+        # Find player by name
+        all_players = players.get_players()
+        player = next((p for p in all_players if player_name.lower() in p['full_name'].lower()), None)
+
+        if not player:
+            return jsonify({
+                'success': False,
+                'error': f'Player "{player_name}" not found'
+            }), 404
+
+        # Get player game log
+        gamelog = playergamelog.PlayerGameLog(player_id=player['id'])
+        df = gamelog.get_data_frames()[0]
+
+        # Limit results
+        df = df.head(limit)
+
+        # Convert to records
+        games = df.to_dict('records')
+
+        return jsonify({
+            'success': True,
+            'player': {
+                'id': player['id'],
+                'name': player['full_name'],
+                'is_active': player['is_active']
+            },
+            'games': games,
+            'count': len(games)
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy - Luke's Stats Tracker</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Fantasy Basketball</h1>
+            <p class="subtitle">ESPN Fantasy League Dashboard</p>
+        </header>
+
+        <nav class="page-nav">
+            <a href="/" class="nav-link">📊 Stats Search</a>
+            <a href="/schedule" class="nav-link">📅 Schedule</a>
+            <a href="/fantasy" class="nav-link active">🏆 Fantasy</a>
+        </nav>
+
+        <div class="fantasy-actions">
+            <button id="syncBtn" class="action-btn">
+                <span class="btn-text">🔄 Sync League Data</span>
+                <span class="loader hidden"></span>
+            </button>
+        </div>
+
+        <!-- Standings Section -->
+        <div id="standings" class="results-section">
+            <div class="results-header">
+                <h2>League Standings</h2>
+                <span id="teamCount" class="meta-item"></span>
+            </div>
+            <div class="table-container">
+                <table id="standingsTable">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Team</th>
+                            <th>Owner</th>
+                            <th>W-L</th>
+                            <th>PF</th>
+                            <th>PA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standingsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Matchups Section -->
+        <div id="matchups" class="results-section">
+            <div class="results-header">
+                <h2>This Week's Matchups</h2>
+                <span id="matchupCount" class="meta-item"></span>
+            </div>
+            <div id="matchupsList" class="matchups-list"></div>
+        </div>
+
+        <!-- My Roster Section -->
+        <div id="myRoster" class="results-section">
+            <div class="results-header">
+                <h2>Roster Analysis</h2>
+                <div class="form-group" style="max-width: 300px;">
+                    <select id="teamSelect" class="form-control">
+                        <option value="">Select a team...</option>
+                    </select>
+                </div>
+            </div>
+            <div id="rosterContent" class="hidden">
+                <div class="table-container">
+                    <table id="rosterTable">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Position</th>
+                                <th>Team</th>
+                                <th>Avg Pts</th>
+                                <th>Total Pts</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rosterBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="error" class="error-box hidden"></div>
+        <div id="loading" class="loading-overlay hidden">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <script src="fantasy.js?v=4"></script>
+</body>
+</html>

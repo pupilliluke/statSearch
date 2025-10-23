@@ -50,6 +50,9 @@ Thumbs.db
 # Data directories
 data/
 
+# Logs
+logs/
+
 # Temporary files
 nul
 test.py
