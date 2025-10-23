@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule - Luke's Fantasy Stats Tracker</title>
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏀 NBA Schedule</h1>
+            <p class="subtitle">View daily game schedules and scores</p>
+        </header>
+
+        <nav class="page-nav">
+            <a href="/" class="nav-link">📊 Stats Search</a>
+            <a href="/schedule" class="nav-link active">📅 Schedule</a>
+        </nav>
+
+        <div class="search-section">
+            <form id="scheduleForm">
+                <div class="form-group">
+                    <label for="date">Select Date</label>
+                    <input type="date" id="date" name="date" max="">
+                </div>
+
+                <button type="submit" class="search-btn">
+                    <span class="btn-text">Load Schedule</span>
+                    <span class="loader hidden"></span>
+                </button>
+            </form>
+        </div>
+
+        <div id="scheduleResults" class="results-section hidden">
+            <div class="results-header">
+                <h2>Games</h2>
+                <div class="results-meta">
+                    <span id="scheduleDate" class="meta-item"></span>
+                    <span id="scheduleCount" class="meta-item"></span>
+                </div>
+            </div>
+
+            <div id="gamesList" class="games-list"></div>
+
+            <div id="noGames" class="no-results hidden">
+                <p>⚠️ No games scheduled for this date</p>
+            </div>
+        </div>
+
+        <!-- Box Score Section -->
+        <div id="boxscoreSection" class="boxscore-section hidden">
+            <div class="boxscore-header">
+                <button class="back-btn" onclick="closeBoxScore()">← Back to Schedule</button>
+                <h2 id="boxscoreTitle">Box Score</h2>
+            </div>
+            <div id="boxscoreContent" class="boxscore-content"></div>
+        </div>
+
+        <div id="error" class="error-box hidden"></div>
+    </div>
+
+    <script src="schedule.js?v=2"></script>
+</body>
+</html>

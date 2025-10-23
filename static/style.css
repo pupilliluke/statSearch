@@ -282,6 +282,434 @@ tbody tr:hover {
     display: none;
 }
 
+/* Navigation */
+.page-nav {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.nav-link {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: var(--gray-700);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: var(--shadow);
+}
+
+.nav-link:hover {
+    background: var(--gray-50);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.nav-link.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* Schedule Page Styles */
+.games-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.game-card {
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s;
+}
+
+.game-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.game-status {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.game-status.live {
+    background: var(--danger);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.game-status.final {
+    background: var(--gray-700);
+    color: white;
+}
+
+.game-status.scheduled {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.game-time {
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+.game-matchup {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.team.winner {
+    background: #dcfce7;
+    border: 2px solid var(--success);
+}
+
+.team-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.team-info {
+    flex: 1;
+}
+
+.team-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.team-record {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 0.25rem;
+}
+
+.team-score {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    min-width: 60px;
+    text-align: right;
+}
+
+.matchup-divider {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    padding: 0.5rem 0;
+}
+
+.view-boxscore-btn {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.view-boxscore-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.view-boxscore-btn:disabled {
+    background: var(--gray-300);
+    color: var(--gray-500);
+    cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+    overflow-y: auto;
+}
+
+.modal.show {
+    display: flex;
+    opacity: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 1200px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    transform: scale(0.9);
+    transition: transform 0.3s;
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--gray-800);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-600);
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--gray-100);
+    color: var(--gray-900);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.team-boxscore {
+    margin-bottom: 2rem;
+}
+
+.team-boxscore h3 {
+    color: var(--gray-800);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.boxscore-table {
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.boxscore-table th {
+    background: var(--gray-100);
+    padding: 0.75rem;
+    text-align: left;
+    font-size: 0.75rem;
+}
+
+.boxscore-table td {
+    padding: 0.75rem;
+}
+
+.boxscore-table tbody tr:hover {
+    background: var(--gray-50);
+}
+
+.boxscore-source {
+    text-align: center;
+    padding: 1rem;
+    color: var(--gray-600);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+/* ESPN-Style Box Score Section */
+.boxscore-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    margin-top: 2rem;
+}
+
+.boxscore-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.back-btn {
+    padding: 0.5rem 1rem;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    background: var(--gray-200);
+}
+
+.boxscore-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.espn-team-section {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.espn-team-header {
+    background: var(--gray-800);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.espn-team-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.team-total-score {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.espn-table-wrapper {
+    overflow-x: auto;
+}
+
+.espn-boxscore-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    background: white;
+}
+
+.espn-boxscore-table thead {
+    background: var(--gray-100);
+}
+
+.espn-boxscore-table th {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray-700);
+    border-bottom: 2px solid var(--gray-300);
+}
+
+.espn-boxscore-table th.player-col {
+    text-align: left;
+    padding-left: 1rem;
+    min-width: 180px;
+}
+
+.espn-boxscore-table td {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.espn-boxscore-table td.player-col {
+    text-align: left;
+    padding-left: 1rem;
+}
+
+.espn-boxscore-table .even-row {
+    background: white;
+}
+
+.espn-boxscore-table .odd-row {
+    background: var(--gray-50);
+}
+
+.espn-boxscore-table tbody tr:hover {
+    background: #f0f7ff;
+}
+
+.espn-boxscore-table .totals-row {
+    background: var(--gray-100);
+    font-weight: 700;
+    border-top: 2px solid var(--gray-300);
+}
+
+.espn-boxscore-table .totals-row:hover {
+    background: var(--gray-100);
+}
+
+.boxscore-footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--gray-600);
+    font-size: 0.875rem;
+    font-style: italic;
+    border-top: 1px solid var(--gray-200);
+}
+
 @media (max-width: 768px) {
     body {
         padding: 1rem;

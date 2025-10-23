@@ -46,3 +46,11 @@ Thumbs.db
 # IDE history
 .history/
 .claude/
+
+# Data directories
+data/
+
+# Temporary files
+nul
+test.py
+howto.txt
