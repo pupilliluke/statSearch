@@ -1,0 +1,3 @@
+If you don’t pass any, it falls back to the default (20/5/7).
+
+Optional --logic any|all (default any) to require any or all of the provided thresholds.

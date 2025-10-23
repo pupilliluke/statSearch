@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luke's Fantasy Stats Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏀 Luke's Fantasy Stats Tracker</h1>
+            <p class="subtitle">Find players meeting your stat criteria across multiple sources</p>
+        </header>
+
+        <div class="search-section">
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" max="">
+                </div>
+
+                <div class="stats-inputs">
+                    <div class="form-group">
+                        <label for="pts">Points</label>
+                        <input type="number" id="pts" name="pts" min="0" placeholder="e.g., 25">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ast">Assists</label>
+                        <input type="number" id="ast" name="ast" min="0" placeholder="e.g., 5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reb">Rebounds</label>
+                        <input type="number" id="reb" name="reb" min="0" placeholder="e.g., 10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="logic">Logic</label>
+                    <select id="logic" name="logic">
+                        <option value="any">ANY (match at least one threshold)</option>
+                        <option value="all">ALL (match all thresholds)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="search-btn">
+                    <span class="btn-text">Search Stats</span>
+                    <span class="loader hidden"></span>
+                </button>
+            </form>
+
+            <div class="info-box">
+                <strong>ℹ️ How it works:</strong>
+                <ul>
+                    <li>Leave thresholds empty to use defaults (20+ PTS, 5+ AST, or 7+ REB)</li>
+                    <li>Set specific thresholds to filter players</li>
+                    <li>Choose ANY to find players meeting at least one threshold</li>
+                    <li>Choose ALL to find players meeting all thresholds</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="results" class="results-section hidden">
+            <div class="results-header">
+                <h2>Results</h2>
+                <div class="results-meta">
+                    <span id="resultsDate" class="meta-item"></span>
+                    <span id="resultsSource" class="meta-item"></span>
+                    <span id="resultsCount" class="meta-item"></span>
+                </div>
+            </div>
+
+            <div id="resultsFilters" class="filters-display"></div>
+
+            <div class="table-container">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Team</th>
+                            <th class="stat-col">PTS</th>
+                            <th class="stat-col">REB</th>
+                            <th class="stat-col">AST</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="noResults" class="no-results hidden">
+                <p>⚠️ No players found matching the criteria</p>
+            </div>
+        </div>
+
+        <div id="error" class="error-box hidden"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
