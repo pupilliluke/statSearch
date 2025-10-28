@@ -362,5 +362,51 @@ def get_player_stats(player_name):
 def health_check():
     return jsonify({'status': 'healthy'})
 
+@app.route('/api/debug', methods=['GET'])
+def debug():
+    """Debug endpoint to test imports and basic functionality"""
+    import sys
+    debug_info = {
+        'python_version': sys.version,
+        'python_path': sys.path[:3],
+        'cwd': os.getcwd(),
+        'imports': {}
+    }
+
+    # Test imports
+    try:
+        import tracker
+        debug_info['imports']['tracker'] = 'OK'
+    except Exception as e:
+        debug_info['imports']['tracker'] = str(e)
+
+    try:
+        import boxscore_controller
+        debug_info['imports']['boxscore_controller'] = 'OK'
+    except Exception as e:
+        debug_info['imports']['boxscore_controller'] = str(e)
+
+    try:
+        import nba_api
+        debug_info['imports']['nba_api'] = 'OK'
+    except Exception as e:
+        debug_info['imports']['nba_api'] = str(e)
+
+    # Test a simple scraper call
+    try:
+        players, source = tracker.get_all_stats('2024-10-28', 30, None, None, 'any')
+        debug_info['test_scrape'] = {
+            'source': source,
+            'player_count': len(players),
+            'success': True
+        }
+    except Exception as e:
+        debug_info['test_scrape'] = {
+            'error': str(e),
+            'success': False
+        }
+
+    return jsonify(debug_info)
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
