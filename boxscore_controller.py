@@ -139,7 +139,7 @@ def fetch_boxscores(date_str: str, game_id: Optional[str] = None, force_source: 
             boxscores = source_func(date_str, game_id)
 
             if boxscores and validate_boxscores(boxscores):
-                print(f"✓ {source_name} returned {len(boxscores)} player records")
+                print(f"{source_name} returned {len(boxscores)} player records")
 
                 # Persist data
                 persist_boxscores(boxscores, source_name, date_str)
@@ -149,11 +149,11 @@ def fetch_boxscores(date_str: str, game_id: Optional[str] = None, force_source: 
                 result["boxscores"] = boxscores
                 return result
             else:
-                print(f"✗ {source_name} returned no valid data")
+                print(f"{source_name} returned no valid data")
 
         except Exception as e:
             error_msg = f"{source_name} error: {str(e)}"
-            print(f"✗ {error_msg}")
+            print(f"Error: {error_msg}")
             result["errors"].append(error_msg)
 
     # If we get here, all sources failed
