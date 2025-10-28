@@ -1,0 +1,15 @@
+{
+  "buildCommand": "echo 'No build needed'",
+  "installCommand": "pip install -r requirements.txt",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/app.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/app.py"
+    }
+  ]
+}
