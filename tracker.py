@@ -153,13 +153,13 @@ def get_all_stats(target_date: str, pts_thr, ast_thr, reb_thr, logic):
         ("RAPIDAPI", lambda: fetch_from_rapidapi(target_date, pts_thr, ast_thr, reb_thr, logic))
     ]
     for name, func in sources:
-        print(f"🔍 Trying {name} for {target_date} ...")
+        print(f"Trying {name} for {target_date} ...")
         data = func()
         if data:
-            print(f"✅ {name} returned {len(data)} players")
+            print(f"{name} returned {len(data)} players")
             return data, name
-        print(f"⚠️  No data from {name}")
-    print("❌ No data from any source.")
+        print(f"No data from {name}")
+    print("No data from any source.")
     return [], None
 
 # ------------------------------- Main -------------------------------
