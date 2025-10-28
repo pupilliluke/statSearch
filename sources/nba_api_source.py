@@ -6,6 +6,7 @@ Uses official NBA stats API via nba_api library
 from typing import List, Dict, Optional
 from datetime import datetime
 import time
+import os
 
 
 def fetch_boxscores(date_str: str, game_id: Optional[str] = None) -> List[Dict]:
@@ -35,10 +36,16 @@ def fetch_boxscores(date_str: str, game_id: Optional[str] = None) -> List[Dict]:
             games_df = scoreboard.get_data_frames()[0]
             game_ids = games_df["GAME_ID"].unique().tolist()
 
+            # Limit games on serverless to avoid timeout (10s on Vercel free)
+            max_games = int(os.environ.get('MAX_GAMES_PER_REQUEST', '15'))
+            if len(game_ids) > max_games:
+                print(f"Warning: Limiting to first {max_games} games to avoid timeout")
+                game_ids = game_ids[:max_games]
+
         # Fetch box score for each game
         for gid in game_ids:
             try:
-                time.sleep(0.6)  # Rate limit: ~1.5 req/sec
+                time.sleep(0.3)  # Rate limit: ~3 req/sec (faster for serverless)
 
                 boxscore = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=gid)
                 players_df = boxscore.get_data_frames()[0]

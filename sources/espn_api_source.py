@@ -79,7 +79,7 @@ def fetch_boxscores(date_str: str, game_id: Optional[str] = None) -> List[Dict]:
 
         # Fetch box score for each game
         for event_id in event_ids:
-            time.sleep(0.5)  # Rate limiting
+            time.sleep(0.2)  # Rate limiting (faster for serverless)
 
             # Try summary endpoint first
             for endpoint in ["summary", "boxscore"]:
