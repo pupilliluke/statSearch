@@ -169,10 +169,17 @@ def generate_daily_fantasy_report(
         boxscore_file = Path(boxscore_data_dir) / f"boxscores_{target_date}.csv"
 
         if not boxscore_file.exists():
-            print(f"⚠ No box score data found for {target_date}")
-            return report
-
-        boxscores = pd.read_csv(boxscore_file)
+            # Try to fetch boxscores on-demand
+            print(f"⚠ No cached box score data found for {target_date}, fetching...")
+            import boxscore_controller
+            result = boxscore_controller.fetch_boxscores(target_date)
+            if result['success'] and result['boxscores']:
+                boxscores = pd.DataFrame(result['boxscores'])
+            else:
+                print(f"⚠ Could not fetch box score data for {target_date}")
+                return report
+        else:
+            boxscores = pd.read_csv(boxscore_file)
 
         # Merge data
         merged = merge_fantasy_with_boxscores(
@@ -195,16 +202,19 @@ def generate_daily_fantasy_report(
         injured = merged[merged['injured'] == True]
         report['injured_players'] = injured[['player_name', 'team_name', 'injuryStatus']].to_dict('records')
 
-        # Save report
-        report_dir = Path("data/fantasy/reports")
-        report_dir.mkdir(parents=True, exist_ok=True)
-        report_file = report_dir / f"daily_report_{target_date}.json"
+        # Save report (optional - skip on read-only file systems)
+        try:
+            report_dir = Path("data/fantasy/reports")
+            report_dir.mkdir(parents=True, exist_ok=True)
+            report_file = report_dir / f"daily_report_{target_date}.json"
 
-        import json
-        with open(report_file, "w") as f:
-            json.dump(report, f, indent=2)
+            import json
+            with open(report_file, "w") as f:
+                json.dump(report, f, indent=2)
 
-        print(f"✅ Daily report generated: {report_file}")
+            print(f"✅ Daily report generated: {report_file}")
+        except Exception:
+            print("Note: Could not save report to disk (read-only filesystem)")
 
     except Exception as e:
         print(f"❌ Error generating report: {e}")

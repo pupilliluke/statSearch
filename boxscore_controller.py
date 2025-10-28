@@ -47,54 +47,58 @@ def validate_boxscores(boxscores: List[Dict]) -> bool:
 
 def persist_boxscores(boxscores: List[Dict], source: str, date_str: str):
     """
-    Save box scores to disk
+    Save box scores to disk (optional - skips if directory creation fails)
 
     Args:
         boxscores: List of box score dictionaries
         source: Name of the data source
         date_str: Date string (YYYY-MM-DD)
     """
-    # Create directories if they don't exist
-    raw_dir = Path("data/raw") / source / date_str
-    raw_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        # Create directories if they don't exist
+        raw_dir = Path("data/raw") / source / date_str
+        raw_dir.mkdir(parents=True, exist_ok=True)
 
-    processed_dir = Path("data/processed")
-    processed_dir.mkdir(parents=True, exist_ok=True)
+        processed_dir = Path("data/processed")
+        processed_dir.mkdir(parents=True, exist_ok=True)
 
-    logs_dir = Path("data/logs")
-    logs_dir.mkdir(parents=True, exist_ok=True)
+        logs_dir = Path("data/logs")
+        logs_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save raw JSON
-    raw_file = raw_dir / f"boxscores_{datetime.utcnow().timestamp()}.json"
-    with open(raw_file, "w") as f:
-        json.dump(boxscores, f, indent=2)
+        # Save raw JSON
+        raw_file = raw_dir / f"boxscores_{datetime.utcnow().timestamp()}.json"
+        with open(raw_file, "w") as f:
+            json.dump(boxscores, f, indent=2)
 
-    # Save processed CSV
-    import pandas as pd
-    df = pd.DataFrame(boxscores)
-    csv_file = processed_dir / f"boxscores_{date_str}.csv"
-    df.to_csv(csv_file, index=False)
+        # Save processed CSV
+        import pandas as pd
+        df = pd.DataFrame(boxscores)
+        csv_file = processed_dir / f"boxscores_{date_str}.csv"
+        df.to_csv(csv_file, index=False)
 
-    # Log metadata
-    log_entry = {
-        "date": date_str,
-        "source": source,
-        "timestamp_utc": datetime.utcnow().isoformat() + "Z",
-        "games_found": len(set(box["game_id"] for box in boxscores)),
-        "players_found": len(boxscores),
-        "status": "success"
-    }
+        # Log metadata
+        log_entry = {
+            "date": date_str,
+            "source": source,
+            "timestamp_utc": datetime.utcnow().isoformat() + "Z",
+            "games_found": len(set(box["game_id"] for box in boxscores)),
+            "players_found": len(boxscores),
+            "status": "success"
+        }
 
-    log_file = logs_dir / f"scrape_log_{date_str}.json"
-    logs = []
-    if log_file.exists():
-        with open(log_file, "r") as f:
-            logs = json.load(f)
+        log_file = logs_dir / f"scrape_log_{date_str}.json"
+        logs = []
+        if log_file.exists():
+            with open(log_file, "r") as f:
+                logs = json.load(f)
 
-    logs.append(log_entry)
+        logs.append(log_entry)
 
-    with open(log_file, "w") as f:
-        json.dump(logs, f, indent=2)
+        with open(log_file, "w") as f:
+            json.dump(logs, f, indent=2)
+    except Exception as e:
+        # Silently skip persistence on read-only file systems (e.g., Vercel)
+        print(f"Note: Could not persist data (read-only filesystem): {e}")
 
 
 def fetch_boxscores(date_str: str, game_id: Optional[str] = None, force_source: Optional[str] = None) -> Dict:
