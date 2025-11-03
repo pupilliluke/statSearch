@@ -170,13 +170,13 @@ def generate_daily_fantasy_report(
 
         if not boxscore_file.exists():
             # Try to fetch boxscores on-demand
-            print(f"⚠ No cached box score data found for {target_date}, fetching...")
+            print(f"Warning: No cached box score data found for {target_date}, fetching...")
             import boxscore_controller
             result = boxscore_controller.fetch_boxscores(target_date)
             if result['success'] and result['boxscores']:
                 boxscores = pd.DataFrame(result['boxscores'])
             else:
-                print(f"⚠ Could not fetch box score data for {target_date}")
+                print(f"Warning: Could not fetch box score data for {target_date}")
                 return report
         else:
             boxscores = pd.read_csv(boxscore_file)
@@ -212,12 +212,12 @@ def generate_daily_fantasy_report(
             with open(report_file, "w") as f:
                 json.dump(report, f, indent=2)
 
-            print(f"✅ Daily report generated: {report_file}")
+            print(f"Success: Daily report generated: {report_file}")
         except Exception:
             print("Note: Could not save report to disk (read-only filesystem)")
 
     except Exception as e:
-        print(f"❌ Error generating report: {e}")
+        print(f"Error generating report: {e}")
         report['error'] = str(e)
 
     return report
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     report = generate_daily_fantasy_report()
 
     if 'error' not in report:
-        print(f"\n📊 Daily Report for {report['date']}")
+        print(f"\nDaily Report for {report['date']}")
         print(f"Top Performers: {len(report['top_performers'])}")
         print(f"Underperformers: {len(report['underperformers'])}")
         print(f"Injured: {len(report['injured_players'])}")

@@ -147,8 +147,8 @@ def fetch_from_rapidapi(target_date: str, pts_thr, ast_thr, reb_thr, logic, api_
 
 def get_all_stats(target_date: str, pts_thr, ast_thr, reb_thr, logic):
     sources = [
-        ("ESPN", lambda: fetch_from_espn(target_date.replace("-", ""), pts_thr, ast_thr, reb_thr, logic)),
         ("NBAAPI", lambda: fetch_from_nba_api(target_date, pts_thr, ast_thr, reb_thr, logic)),
+        ("ESPN", lambda: fetch_from_espn(target_date.replace("-", ""), pts_thr, ast_thr, reb_thr, logic)),
         ("BALLDONTLIE", lambda: fetch_from_bdl(target_date, pts_thr, ast_thr, reb_thr, logic)),
         ("RAPIDAPI", lambda: fetch_from_rapidapi(target_date, pts_thr, ast_thr, reb_thr, logic))
     ]
