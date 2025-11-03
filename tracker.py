@@ -47,7 +47,7 @@ def qualifies(pts: float, ast: float, reb: float,
 def fetch_from_espn(date_str: str, pts_thr, ast_thr, reb_thr, logic) -> List[Dict]:
     url = f"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates={date_str}"
     try:
-        games = requests.get(url, timeout=10).json().get("events", [])
+        games = requests.get(url, timeout=5).json().get("events", [])
     except Exception:
         return []
     players = []
@@ -58,7 +58,7 @@ def fetch_from_espn(date_str: str, pts_thr, ast_thr, reb_thr, logic) -> List[Dic
         for endpoint in ["summary", "boxscore"]:
             try:
                 u = f"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/{endpoint}?event={gid}"
-                box = requests.get(u, timeout=10).json().get("boxscore", {})
+                box = requests.get(u, timeout=5).json().get("boxscore", {})
                 if not box:
                     continue
                 players += _parse_espn_box(box, pts_thr, ast_thr, reb_thr, logic)
@@ -92,14 +92,14 @@ def fetch_from_nba_api(target_date: str, pts_thr, ast_thr, reb_thr, logic) -> Li
     except ImportError:
         return []
     try:
-        sb = scoreboardv2.ScoreboardV2(game_date=target_date, day_offset=0)
+        sb = scoreboardv2.ScoreboardV2(game_date=target_date, day_offset=0, timeout=5)
         games = sb.get_data_frames()[0]
     except Exception:
         return []
     all_players = []
     for gid in games["GAME_ID"].unique():
         try:
-            box = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=gid)
+            box = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=gid, timeout=5)
             df = box.get_data_frames()[0]
             df = df[["PLAYER_NAME", "TEAM_ABBREVIATION", "PTS", "REB", "AST"]]
             # Filter row-by-row using our qualifies() logic (because thresholds may be partially specified)
@@ -120,7 +120,7 @@ def fetch_from_nba_api(target_date: str, pts_thr, ast_thr, reb_thr, logic) -> Li
 def fetch_from_bdl(target_date: str, pts_thr, ast_thr, reb_thr, logic) -> List[Dict]:
     url = f"https://api.balldontlie.io/v1/stats?dates[]={target_date}&per_page=100"
     try:
-        r = requests.get(url, timeout=10)
+        r = requests.get(url, timeout=5)
         data = r.json().get("data", [])
     except Exception:
         return []
