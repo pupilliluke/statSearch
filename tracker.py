@@ -45,44 +45,57 @@ def qualifies(pts: float, ast: float, reb: float,
 # ------------------------------- ESPN -------------------------------
 
 def fetch_from_espn(date_str: str, pts_thr, ast_thr, reb_thr, logic) -> List[Dict]:
+    """Fetch stats from ESPN scoreboard API - single call with all data"""
     url = f"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates={date_str}"
     try:
-        games = requests.get(url, timeout=5).json().get("events", [])
+        response = requests.get(url, timeout=5).json()
+        events = response.get("events", [])
     except Exception:
         return []
-    players = []
-    for g in games:
-        gid = g.get("id")
-        if not gid:
-            continue
-        for endpoint in ["summary", "boxscore"]:
-            try:
-                u = f"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/{endpoint}?event={gid}"
-                box = requests.get(u, timeout=5).json().get("boxscore", {})
-                if not box:
-                    continue
-                players += _parse_espn_box(box, pts_thr, ast_thr, reb_thr, logic)
-            except Exception:
-                continue
-    return players
 
-def _parse_espn_box(box, pts_thr, ast_thr, reb_thr, logic):
-    out = []
-    for container in box.get("teams", []) + box.get("players", []):
-        team = container.get("team", {}).get("displayName", "")
-        for group in container.get("statistics", []):
-            for a in group.get("athletes", []):
-                stats = {s.get("name"): s.get("displayValue") for s in a.get("stats", [])}
-                pts = _num(stats.get("points") or stats.get("PTS"))
-                ast = _num(stats.get("assists") or stats.get("AST"))
-                reb = _num(stats.get("rebounds") or stats.get("REB"))
-                if qualifies(pts, ast, reb, pts_thr, ast_thr, reb_thr, logic):
-                    out.append({
-                        "Player": a.get("athlete", {}).get("displayName"),
-                        "Team": team,
-                        "PTS": pts, "REB": reb, "AST": ast
-                    })
-    return out
+    players = []
+    for event in events:
+        competitions = event.get("competitions", [])
+        if not competitions:
+            continue
+
+        for competition in competitions:
+            competitors = competition.get("competitors", [])
+
+            for competitor in competitors:
+                team_name = competitor.get("team", {}).get("abbreviation", "")
+                statistics = competitor.get("statistics", [])
+
+                # Parse athletes from statistics
+                for stat_group in statistics:
+                    athletes = stat_group.get("athletes", [])
+
+                    for athlete_data in athletes:
+                        athlete = athlete_data.get("athlete", {})
+                        player_name = athlete.get("displayName", "")
+
+                        # Build stats dict from athlete stats
+                        stats_dict = {}
+                        for stat in athlete_data.get("stats", []):
+                            stat_name = stat.get("name", "").lower()
+                            stat_value = stat.get("displayValue", "0")
+                            stats_dict[stat_name] = stat_value
+
+                        # Extract key stats
+                        pts = _num(stats_dict.get("points", 0))
+                        ast = _num(stats_dict.get("assists", 0))
+                        reb = _num(stats_dict.get("rebounds", 0))
+
+                        if qualifies(pts, ast, reb, pts_thr, ast_thr, reb_thr, logic):
+                            players.append({
+                                "Player": player_name,
+                                "Team": team_name,
+                                "PTS": pts,
+                                "REB": reb,
+                                "AST": ast
+                            })
+
+    return players
 
 # ------------------------------- NBA API -------------------------------
 
