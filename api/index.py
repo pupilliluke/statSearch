@@ -50,16 +50,28 @@ def get_stats():
 
         # Suppress print statements from tracker module (Windows emoji encoding issue)
         old_stdout = sys.stdout
+
+        print(f"[API] Fetching stats for date={target_date}, pts={pts_thr}, ast={ast_thr}, reb={reb_thr}, logic={logic}", file=sys.stderr)
+
         sys.stdout = io.StringIO()
 
         try:
             # Fetch stats
             players, source = tracker.get_all_stats(target_date, pts_thr, ast_thr, reb_thr, logic)
+            sys.stdout = old_stdout
+            print(f"[API] Result: source={source}, players={len(players)}", file=sys.stderr)
+            sys.stdout = io.StringIO()
 
             # If no results and no specific date was requested, try yesterday
             if not players and not request.args.get('date'):
                 yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+                sys.stdout = old_stdout
+                print(f"[API] No results, trying yesterday: {yesterday}", file=sys.stderr)
+                sys.stdout = io.StringIO()
                 players, source = tracker.get_all_stats(yesterday, pts_thr, ast_thr, reb_thr, logic)
+                sys.stdout = old_stdout
+                print(f"[API] Yesterday result: source={source}, players={len(players)}", file=sys.stderr)
+                sys.stdout = io.StringIO()
                 target_date = yesterday
         finally:
             sys.stdout = old_stdout
@@ -79,6 +91,7 @@ def get_stats():
             }
         }
 
+        print(f"[API] Returning response: count={len(players)}, source={source}", file=sys.stderr)
         return jsonify(response)
 
     except Exception as e:
